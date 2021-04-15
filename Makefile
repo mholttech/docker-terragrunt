@@ -19,15 +19,16 @@ VERSION_LATEST := tf-$(TF_LATEST)-tg-$(TG_LATEST)
 # Other variables and constants
 CURRENT_BRANCH := $(shell echo $(GITHUB_REF) | sed 's/refs\/heads\///')
 GITHUB_SHORT_SHA := $(shell echo $(GITHUB_SHA) | cut -c1-7)
-DOCKER_USER_ID := christophshyper
-DOCKER_ORG_NAME := devopsinfra
+# DOCKER_USER_ID := christophshyper
+# DOCKER_ORG_NAME := devopsinfra
 DOCKER_IMAGE := docker-terragrunt
-DOCKER_NAME := $(DOCKER_ORG_NAME)/$(DOCKER_IMAGE)
-GITHUB_USER_ID := ChristophShyper
-GITHUB_ORG_NAME := devops-infra
+# DOCKER_NAME := $(DOCKER_ORG_NAME)/$(DOCKER_IMAGE)
+GITHUB_USER_ID := mholttech
+GITHUB_ORG_NAME := mholttech
 GITHUB_NAME := docker.pkg.github.com/$(GITHUB_ORG_NAME)/$(DOCKER_IMAGE)
+DOCKER_NAME := $(GITHUB_NAME)
 BUILD_DATE := $(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
-FLAVOURS := aws azure aws-azure gcp aws-gcp azure-gcp aws-azure-gcp
+FLAVOURS := aws-azure #aws-azure-gcp aws azure  gcp aws-gcp azure-gcp 
 
 # Some cosmetics
 SHELL := bash
@@ -69,7 +70,7 @@ update-versions: ## Check TF and TG versions and update if there's new
 
 
 .PHONY: build-all
-build-all: build-plain build-aws build-azure build-aws-azure build-gcp build-aws-gcp build-azure-gcp build-aws-azure-gcp ## Build all Docker images one by one
+build-all: build-plain build-aws-azure #build-aws build-azure build-gcp build-aws-gcp build-azure-gcp build-aws-azure-gcp ## Build all Docker images one by one
 
 
 .PHONY: build-parallel
@@ -192,8 +193,8 @@ build-aws-azure-gcp: ## Build image with AWS, Azure and GCP CLI
 
 .PHONY: login
 login: ## Log into all registires
-	@echo -e "\n$(TXT_GREEN)Logging to: $(TXT_YELLOW)Docker Hub$(TXT_RESET)"
-	@echo $(DOCKER_TOKEN) | docker login -u $(DOCKER_USER_ID) --password-stdin
+	# @echo -e "\n$(TXT_GREEN)Logging to: $(TXT_YELLOW)Docker Hub$(TXT_RESET)"
+	# @echo $(DOCKER_TOKEN) | docker login -u $(DOCKER_USER_ID) --password-stdin
 	@echo -e "\n$(TXT_GREEN)Logging to: $(TXT_YELLOW)GitHub Packages$(TXT_RESET)"
 	@echo $(GITHUB_TOKEN) | docker login https://docker.pkg.github.com -u $(GITHUB_USER_ID) --password-stdin
 
@@ -204,9 +205,7 @@ push-plain: ## Push only plain image, logging into registries beforehand is requ
 	@docker tag $(DOCKER_NAME):$(VERSION_PREFIX)$(VERSION) $(DOCKER_NAME):$(VERSION_PREFIX)latest
 	@docker tag $(DOCKER_NAME):$(VERSION_PREFIX)$(VERSION) $(GITHUB_NAME)/$(DOCKER_IMAGE):$(VERSION_PREFIX)$(VERSION)
 	@docker tag $(DOCKER_NAME):$(VERSION_PREFIX)$(VERSION) $(GITHUB_NAME)/$(DOCKER_IMAGE):$(VERSION_PREFIX)latest
-	@docker push $(DOCKER_NAME):$(VERSION_PREFIX)$(VERSION) &\
-		docker push $(DOCKER_NAME):$(VERSION_PREFIX)latest &\
-		docker push $(GITHUB_NAME)/$(DOCKER_IMAGE):$(VERSION_PREFIX)$(VERSION) &\
+	@docker push $(GITHUB_NAME)/$(DOCKER_IMAGE):$(VERSION_PREFIX)$(VERSION) &\
 		docker push $(GITHUB_NAME)/$(DOCKER_IMAGE):$(VERSION_PREFIX)latest &\
 		wait ;\
 		echo -e "\n$(TXT_GREEN)Pushed image: $(TXT_YELLOW)$(DOCKER_IMAGE):$(VERSION_PREFIX)$(VERSION)$(TXT_RESET)"
@@ -218,9 +217,7 @@ push-target: ## Push single image flavour defined by TARGET var, logging into re
 	@docker tag $(DOCKER_NAME):$(VERSION_PREFIX)$(TARGET)-$(VERSION) $(DOCKER_NAME):$(VERSION_PREFIX)$(TARGET)-latest
 	@docker tag $(DOCKER_NAME):$(VERSION_PREFIX)$(TARGET)-$(VERSION) $(GITHUB_NAME)/$(DOCKER_IMAGE):$(VERSION_PREFIX)$(TARGET)-$(VERSION)
 	@docker tag $(DOCKER_NAME):$(VERSION_PREFIX)$(TARGET)-$(VERSION) $(GITHUB_NAME)/$(DOCKER_IMAGE):$(VERSION_PREFIX)$(TARGET)-latest
-	@docker push $(DOCKER_NAME):$(VERSION_PREFIX)$(TARGET)-$(VERSION) &\
-		docker push $(DOCKER_NAME):$(VERSION_PREFIX)$(TARGET)-latest &\
-		docker push $(GITHUB_NAME)/$(DOCKER_IMAGE):$(VERSION_PREFIX)$(TARGET)-$(VERSION) &\
+	@docker push $(GITHUB_NAME)/$(DOCKER_IMAGE):$(VERSION_PREFIX)$(TARGET)-$(VERSION) &\
 		docker push $(GITHUB_NAME)/$(DOCKER_IMAGE):$(VERSION_PREFIX)$(TARGET)-latest &\
 		wait ;\
 		echo -e "\n$(TXT_GREEN)Pushed image: $(TXT_YELLOW)$(DOCKER_IMAGE):$(VERSION_PREFIX)$(TARGET)-$(VERSION)$(TXT_RESET)"
