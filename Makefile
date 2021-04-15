@@ -26,6 +26,7 @@ GITHUB_SHORT_SHA := $(shell echo $(GITHUB_SHA) | cut -c1-7)
 GITHUB_USER_ID := mholttech
 GITHUB_ORG_NAME := mholttech
 GITHUB_NAME := docker.pkg.github.com/$(GITHUB_ORG_NAME)/$(DOCKER_IMAGE)
+DOCKER_NAME := $(GITHUB_NAME)
 BUILD_DATE := $(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
 FLAVOURS := aws-azure #aws-azure-gcp aws azure  gcp aws-gcp azure-gcp 
 
